@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "linguatrans"
+version = "0.1.0"
+description = "面向人工翻译者的屏幕取词与逐句翻译工具"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "LinguaTrans contributors" }]
+keywords = ["translation", "ocr", "speech-recognition", "subtitles", "cat-tools"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: X11 Applications :: Qt",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Text Processing :: Linguistic",
+]
+dependencies = [
+    "PySide6>=6.6",
+    "python-docx>=1.1",
+    "Pillow>=10.0",
+    "numpy>=1.24",
+    "rapidocr-onnxruntime>=1.2",
+    "faster-whisper>=1.0",
+    "pymupdf>=1.24",
+    "mss>=9.0",
+    # OCR 只用图像处理，headless 版不带 Qt，能显著减小打包体积
+    "opencv-python-headless>=4.8",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pyinstaller>=6.0"]
+
+[project.scripts]
+linguatrans = "linguatrans.cli:main"
+
+[project.gui-scripts]
+linguatrans-gui = "linguatrans.cli:cmd_gui"
+
+[tool.setuptools.packages.find]
+include = ["linguatrans*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
