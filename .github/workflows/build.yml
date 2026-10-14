@@ -37,7 +37,20 @@ jobs:
       - name: 运行测试
         env:
           QT_QPA_PLATFORM: offscreen
-        run: pytest tests/ -v
+        run: |
+          set +e
+          pytest tests/ -v --junitxml=test-results.xml
+          rc=$?
+          set -e
+          # 判定以 JUnit 报告为准：PySide6 在 offscreen 下的 QObject 析构问题会让
+          # pytest 在打印完报告后、解释器退出阶段段错误(退出码 139)，那不是用例失败。
+          if [ ! -f test-results.xml ]; then echo '未生成测试报告，视为失败'; exit 1; fi
+          if grep -qE 'failures="[1-9]' test-results.xml || grep -qE 'errors="[1-9]' test-results.xml; then
+            echo '存在失败或出错的测试用例'; exit 1
+          fi
+          if [ "$rc" -ne 0 ] && [ "$rc" -ne 139 ]; then echo "pytest 异常退出: $rc"; exit $rc; fi
+          grep -oE '<testsuite [^>]*>' test-results.xml | head -n 1
+          echo "pytest exit code: $rc"
 
   build-linux:
     name: 构建 Linux 版
